@@ -25,6 +25,12 @@ const Controller = (() => {
   const STORAGE_KEY = 'interface_stage2_state';
   const SYNC_STORAGE_KEY = 'interface_stage2_sync_event';
   const WINDOW_ID = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const MIN_WAIT_THRESHOLD_MS = 80;
+  const MOVE_DETECTION_THRESHOLD = 14;
+  const SWIPE_MIN_DISTANCE = 24;
+  const LONG_PRESS_DURATION_MS = 450;
+  const KEYBOARD_SWIPE_DISTANCE = 80;
+  const KEYBOARD_SWIPE_DURATION_MS = 180;
   const channel = 'BroadcastChannel' in window ? new BroadcastChannel('interface_stage2_channel') : null;
 
   const baseInstances = Storage.get('nucleus_instances', [{ id: 1, name: 'Instância 1', active: true }]);
@@ -129,7 +135,7 @@ const Controller = (() => {
     if (!recording || isPlaying) return;
     const now = Date.now();
     const wait = now - lastStepAt;
-    if (wait > 80) macroSteps.push({ type: 'wait', ms: wait });
+    if (wait > MIN_WAIT_THRESHOLD_MS) macroSteps.push({ type: 'wait', ms: wait });
     macroSteps.push({ type: 'command', command: sanitizeCommand(command) });
     lastStepAt = now;
     updateMacroButtons();
@@ -199,7 +205,7 @@ const Controller = (() => {
 
     const dx = event.clientX - state.x;
     const dy = event.clientY - state.y;
-    if (Math.hypot(dx, dy) > 14) state.moved = true;
+    if (Math.hypot(dx, dy) > MOVE_DETECTION_THRESHOLD) state.moved = true;
   }
 
   function handlePointerUp(event, screen) {
@@ -212,7 +218,7 @@ const Controller = (() => {
     const dy = event.clientY - state.y;
     const duration = Date.now() - state.ts;
 
-    if (state.moved && Math.hypot(dx, dy) > 24) {
+    if (state.moved && Math.hypot(dx, dy) > SWIPE_MIN_DISTANCE) {
       const direction = Math.abs(dx) >= Math.abs(dy)
         ? (dx >= 0 ? 'direita' : 'esquerda')
         : (dy >= 0 ? 'baixo' : 'cima');
@@ -226,7 +232,7 @@ const Controller = (() => {
     }
 
     issueLocalCommand({
-      type: duration > 450 ? 'longPress' : 'tap',
+      type: duration > LONG_PRESS_DURATION_MS ? 'longPress' : 'tap',
       scope: isSyncEnabled ? 'all' : 'single',
       targetId: instanceId,
       payload: { x: Math.round(state.x), y: Math.round(state.y), duration },
@@ -368,11 +374,11 @@ const Controller = (() => {
       }
 
       if ((event.key === 'q' || event.key === 'Q') && !event.repeat) {
-        issueLocalCommand({ type: 'swipe', scope: isSyncEnabled ? 'all' : 'single', targetId: selectedInstance()?.id, payload: { direction: 'esquerda', dx: -80, dy: 0, duration: 180 } });
+        issueLocalCommand({ type: 'swipe', scope: isSyncEnabled ? 'all' : 'single', targetId: selectedInstance()?.id, payload: { direction: 'esquerda', dx: -KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS } });
       }
 
       if ((event.key === 'e' || event.key === 'E') && !event.repeat) {
-        issueLocalCommand({ type: 'swipe', scope: isSyncEnabled ? 'all' : 'single', targetId: selectedInstance()?.id, payload: { direction: 'direita', dx: 80, dy: 0, duration: 180 } });
+        issueLocalCommand({ type: 'swipe', scope: isSyncEnabled ? 'all' : 'single', targetId: selectedInstance()?.id, payload: { direction: 'direita', dx: KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS } });
       }
 
       if (event.key === 'ArrowUp' || event.key === 'w' || event.key === 'W') { joystick.up = true; sendJoystick(); }
