@@ -24,14 +24,17 @@ const Toast = (() => {
 const Controller = (() => {
   const STORAGE_KEY = 'interface_stage2_state';
   const SYNC_STORAGE_KEY = 'interface_stage2_sync_event';
-  const WINDOW_ID = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const MIN_WAIT_THRESHOLD_MS = 80;
   const MOVE_DETECTION_THRESHOLD = 14;
+  const MOVE_DETECTION_THRESHOLD_SQ = MOVE_DETECTION_THRESHOLD * MOVE_DETECTION_THRESHOLD;
   const SWIPE_MIN_DISTANCE = 24;
+  const SWIPE_MIN_DISTANCE_SQ = SWIPE_MIN_DISTANCE * SWIPE_MIN_DISTANCE;
   const LONG_PRESS_DURATION_MS = 450;
   const KEYBOARD_SWIPE_DISTANCE = 80;
   const KEYBOARD_SWIPE_DURATION_MS = 180;
+  const JOYSTICK_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D'];
   const channel = 'BroadcastChannel' in window ? new BroadcastChannel('interface_stage2_channel') : null;
+  const WINDOW_ID = createUniqueId();
 
   const baseInstances = Storage.get('nucleus_instances', [{ id: 1, name: 'Instância 1', active: true }]);
   const active = baseInstances.filter(i => i.active);
@@ -150,6 +153,16 @@ const Controller = (() => {
     };
   }
 
+  function createUniqueId() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    if (window.crypto?.getRandomValues) {
+      const arr = new Uint32Array(2);
+      window.crypto.getRandomValues(arr);
+      return `${Date.now()}-${arr[0].toString(16)}${arr[1].toString(16)}`;
+    }
+    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
   function applyCommand(command, options = {}) {
     const { shouldBroadcast = true, shouldRecord = true } = options;
     const targets = targetInstances(command.scope, command.targetId);
@@ -168,7 +181,7 @@ const Controller = (() => {
 
   function broadcast(command) {
     const envelope = {
-      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+      id: createUniqueId(),
       source: WINDOW_ID,
       command,
       sentAt: Date.now(),
@@ -205,7 +218,7 @@ const Controller = (() => {
 
     const dx = event.clientX - state.x;
     const dy = event.clientY - state.y;
-    if (Math.hypot(dx, dy) > MOVE_DETECTION_THRESHOLD) state.moved = true;
+    if ((dx * dx) + (dy * dy) > MOVE_DETECTION_THRESHOLD_SQ) state.moved = true;
   }
 
   function handlePointerUp(event, screen) {
@@ -218,7 +231,7 @@ const Controller = (() => {
     const dy = event.clientY - state.y;
     const duration = Date.now() - state.ts;
 
-    if (state.moved && Math.hypot(dx, dy) > SWIPE_MIN_DISTANCE) {
+    if (state.moved && ((dx * dx) + (dy * dy) > SWIPE_MIN_DISTANCE_SQ)) {
       const direction = Math.abs(dx) >= Math.abs(dy)
         ? (dx >= 0 ? 'direita' : 'esquerda')
         : (dy >= 0 ? 'baixo' : 'cima');
@@ -361,7 +374,7 @@ const Controller = (() => {
     });
 
     document.addEventListener('keydown', event => {
-      const tag = (event.target?.tagName || '').toLowerCase();
+      const tag = event.target.tagName.toLowerCase();
       if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
 
       if (event.key === ' ' && !event.repeat) {
@@ -392,7 +405,7 @@ const Controller = (() => {
       if (event.key === 'ArrowDown' || event.key === 's' || event.key === 'S') joystick.down = false;
       if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') joystick.left = false;
       if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') joystick.right = false;
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D'].includes(event.key)) {
+      if (JOYSTICK_KEYS.includes(event.key)) {
         sendJoystick();
       }
     });
