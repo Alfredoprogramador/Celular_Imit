@@ -147,16 +147,27 @@
         dialedNumber: ""
       };
       const dialKeys = [1, 2, 3, 4, 5, 6, 7, 8, 9, "*", 0, "#"];
+      const dialPattern = /^[0-9*#]{1,15}$/;
 
       const screen = document.getElementById("screen");
       const clock = document.getElementById("clock");
 
       function tickClock() {
+        if (!clock) return;
         const now = new Date();
         clock.textContent = now.toLocaleTimeString("pt-BR", {
           hour: "2-digit",
           minute: "2-digit"
         });
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll("\"", "&quot;")
+          .replaceAll("'", "&#39;");
       }
 
       function render() {
@@ -198,9 +209,9 @@
         if (state.activeApp === "phone") {
           screen.innerHTML = `
             <h3>📞 Discador Android</h3>
-            <div class="output" id="dial-output">Número: ${state.dialedNumber || "(vazio)"}</div>
+            <div class="output" id="dial-output">Número: ${state.dialedNumber ? escapeHtml(state.dialedNumber) : "(vazio)"}</div>
             <div class="dial">
-              ${dialKeys.map((k) => `<button class="key" data-key="${k}">${k}</button>`).join("")}
+              ${dialKeys.map((k) => `<button class="key" data-key="${escapeHtml(k)}">${escapeHtml(k)}</button>`).join("")}
             </div>
             <button class="action call" id="call">Ligar</button>
           `;
@@ -216,6 +227,11 @@
             const output = document.getElementById("dial-output");
             if (!state.dialedNumber) {
               output.textContent = "Digite um número antes de ligar.";
+              return;
+            }
+            if (!dialPattern.test(state.dialedNumber)) {
+              output.textContent = "Número inválido.";
+              state.dialedNumber = "";
               return;
             }
             output.textContent = `Chamando ${state.dialedNumber}...`;
