@@ -126,7 +126,7 @@
   <body>
     <main class="phone">
       <header class="status">
-        <span id="clock" aria-live="polite">00:00</span>
+        <span id="clock">00:00</span>
         <span>4G ▮▮▮ 87%</span>
       </header>
 
@@ -210,7 +210,7 @@
         if (state.activeApp === "phone") {
           screen.innerHTML = `
             <h3>📞 Discador Android</h3>
-            <div class="output" id="dial-output">Número: ${state.dialedNumber ? escapeHtml(state.dialedNumber) : "(vazio)"}</div>
+            <div class="output" id="dial-output" aria-live="polite">Número: ${state.dialedNumber ? escapeHtml(state.dialedNumber) : "(vazio)"}</div>
             <div class="dial">
               ${dialKeys.map((k) => `<button class="key" data-key="${escapeHtml(k)}">${escapeHtml(k)}</button>`).join("")}
             </div>
