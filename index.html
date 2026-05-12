@@ -163,6 +163,17 @@
         });
       }
 
+      function startClock() {
+        if (!clock) return;
+        tickClock();
+        const now = new Date();
+        const nextTickDelay = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+        setTimeout(() => {
+          tickClock();
+          setInterval(tickClock, CLOCK_UPDATE_INTERVAL_MS);
+        }, nextTickDelay);
+      }
+
       function escapeHtml(value) {
         return String(value)
           .replace(/&/g, "&amp;")
@@ -299,8 +310,7 @@
         render();
       };
 
-      tickClock();
-      if (clock) setInterval(tickClock, CLOCK_UPDATE_INTERVAL_MS);
+      startClock();
       render();
     </script>
   </body>
