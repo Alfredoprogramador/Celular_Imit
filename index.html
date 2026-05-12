@@ -289,7 +289,7 @@
       };
 
       tickClock();
-      setInterval(tickClock, 1000);
+      if (clock) setInterval(tickClock, 1000);
       render();
     </script>
   </body>
