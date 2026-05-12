@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Etapa Final — Otimização e Multimídia | Celular_Imit</title>
+  <link rel="stylesheet" href="optimization.css" />
+</head>
+<body>
+
+  <!-- ── Page Header ──────────────────────────────────── -->
+  <div class="page-header">
+    <a href="../index.html">← Painel</a>
+    <h1>🚀 Etapa Final — Otimização e Multimídia</h1>
+    <span id="status-summary" style="font-size:.82rem;color:var(--muted);white-space:nowrap;"></span>
+  </div>
+
+  <!-- ── Main Grid ────────────────────────────────────── -->
+  <main class="opt-grid">
+
+    <!-- 1. Eco Mode -->
+    <section class="panel">
+      <div class="panel-title">
+        <span class="icon">🌿</span>
+        Modo Eco
+        <label class="toggle" style="margin-left:auto;" title="Ativar Modo Eco globalmente">
+          <input type="checkbox" id="eco-global-toggle" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="eco-global-row">
+        <span>Modo Eco Global</span>
+        <span id="eco-global-label" style="color:var(--muted);">Desativado</span>
+      </div>
+
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;line-height:1.5;">
+        Reduz drasticamente a taxa de quadros (FPS) das instâncias secundárias para liberar CPU e prolongar a vida útil do hardware.
+      </p>
+
+      <ul id="eco-instance-list" class="eco-instance-list">
+        <li class="eco-empty">Nenhuma instância encontrada. Crie instâncias na Etapa 1.</li>
+      </ul>
+    </section>
+
+    <!-- 2. Graphics Renderer -->
+    <section class="panel">
+      <div class="panel-title">
+        <span class="icon">🎮</span>
+        Renderização Gráfica
+      </div>
+
+      <div class="gpu-info-box" id="gpu-info-box">
+        <div><span class="label">GPU Detectada: </span><span class="value" id="gpu-vendor">Detectando…</span></div>
+        <div><span class="label">Renderizador: </span><span class="value" id="gpu-renderer">—</span></div>
+        <div><span class="label">API Recomendada: </span><span class="value" id="gpu-recommended">—</span></div>
+      </div>
+
+      <div class="api-selector" id="api-selector">
+        <button class="api-btn" data-api="directx">
+          <span class="api-icon">🪟</span>
+          <span class="api-name">DirectX (ANGLE)</span>
+          <span class="api-desc">Melhor para GPUs NVIDIA / AMD no Windows</span>
+        </button>
+        <button class="api-btn" data-api="opengl">
+          <span class="api-icon">🐧</span>
+          <span class="api-name">OpenGL</span>
+          <span class="api-desc">Melhor para Linux, macOS e GPUs Intel</span>
+        </button>
+      </div>
+
+      <div class="quality-row">
+        <span>Qualidade de Renderização</span>
+        <select id="render-quality">
+          <option value="low">Baixa</option>
+          <option value="medium" selected>Média</option>
+          <option value="high">Alta</option>
+          <option value="ultra">Ultra</option>
+        </select>
+      </div>
+
+      <div style="margin-top:14px;">
+        <button id="apply-graphics-btn" class="btn primary" style="width:100%;">
+          ✔ Aplicar Configurações
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. Screenshot & Recording -->
+    <section class="panel">
+      <div class="panel-title">
+        <span class="icon">📸</span>
+        Captura de Tela e Gravação
+      </div>
+
+      <div class="capture-status">
+        <span class="rec-dot" id="rec-dot"></span>
+        <span id="capture-status-text">Pronto para capturar.</span>
+      </div>
+
+      <div class="capture-actions">
+        <button id="screenshot-btn" class="btn primary">
+          📷 Capturar Tela
+        </button>
+        <button id="record-btn" class="btn success">
+          ⏺ Iniciar Gravação
+        </button>
+      </div>
+
+      <div class="capture-download-area">
+        <img id="preview-thumb" class="preview-thumb" alt="Prévia da captura" />
+        <a id="screenshot-link" style="display:none;" download="celular_imit_screenshot.png">
+          <button class="btn" style="width:100%;">⬇ Baixar Screenshot (PNG)</button>
+        </a>
+        <a id="video-link" style="display:none;" download="celular_imit_recording.webm">
+          <button class="btn" style="width:100%;">⬇ Baixar Gravação (WebM)</button>
+        </a>
+      </div>
+    </section>
+
+    <!-- 4. Gamepad Support -->
+    <section class="panel">
+      <div class="panel-title">
+        <span class="icon">🕹️</span>
+        Suporte a Gamepads
+      </div>
+
+      <div class="gamepad-status" id="gamepad-status">
+        Aguardando conexão de gamepad. Conecte um controle e pressione qualquer botão.
+      </div>
+
+      <ul id="gamepad-list" class="gamepad-list">
+        <li class="no-gamepad" id="no-gamepad-msg">
+          🎮 Nenhum controle conectado.<br/>
+          <span style="font-size:.78rem;">Plug-and-play: conecte um gamepad USB ou Bluetooth.</span>
+        </li>
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- ── Toast ────────────────────────────────────────── -->
+  <div id="toast"></div>
+
+  <script src="optimization.js"></script>
+</body>
+</html>
