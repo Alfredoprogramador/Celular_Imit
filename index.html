@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Emulador Android para PC - Celular Imit</title>
+    <title>Emulador Android para PC - Celular Imitador</title>
     <style>
       :root {
         color-scheme: dark;
@@ -249,14 +249,16 @@
 
       document.getElementById("power").onclick = () => {
         state.powered = !state.powered;
-        state.locked = state.powered;
+        state.locked = true;
         state.activeApp = null;
+        state.dialedNumber = "";
         render();
       };
 
       document.getElementById("home").onclick = () => {
         if (!state.powered || state.locked) return;
         state.activeApp = null;
+        state.dialedNumber = "";
         render();
       };
 
@@ -264,6 +266,7 @@
         if (!state.powered) return;
         state.locked = true;
         state.activeApp = null;
+        state.dialedNumber = "";
         render();
       };
 
