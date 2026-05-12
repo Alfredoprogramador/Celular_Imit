@@ -2,7 +2,10 @@ function $(sel, ctx = document) { return ctx.querySelector(sel); }
 
 const Storage = {
   get(key, fallback = null) {
-    try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
+    try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (error) {
+      console.warn(`Falha ao ler storage key "${key}"`, error);
+      return fallback;
+    }
   },
   set(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* noop */ }
@@ -33,6 +36,10 @@ const Controller = (() => {
   const KEYBOARD_SWIPE_DISTANCE = 80;
   const KEYBOARD_SWIPE_DURATION_MS = 180;
   const JOYSTICK_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D'];
+  const JOYSTICK_KEY_MAP = {
+    ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+    w: 'up', W: 'up', s: 'down', S: 'down', a: 'left', A: 'left', d: 'right', D: 'right',
+  };
   const channel = 'BroadcastChannel' in window ? new BroadcastChannel('interface_stage2_channel') : null;
   const WINDOW_ID = createUniqueId();
 
@@ -91,6 +98,10 @@ const Controller = (() => {
     if (command.type === 'joystick') return `Joystick x:${command.payload.x} y:${command.payload.y}`;
     if (command.type === 'orientation') return `Orientação ${command.payload.mode === 'portrait' ? 'Retrato' : 'Paisagem'}`;
     return command.type;
+  }
+
+  function getDistanceSquared(dx, dy) {
+    return (dx * dx) + (dy * dy);
   }
 
   function render() {
@@ -218,7 +229,7 @@ const Controller = (() => {
 
     const dx = event.clientX - state.x;
     const dy = event.clientY - state.y;
-    if ((dx * dx) + (dy * dy) > MOVE_DETECTION_THRESHOLD_SQ) state.moved = true;
+    if (getDistanceSquared(dx, dy) > MOVE_DETECTION_THRESHOLD_SQ) state.moved = true;
   }
 
   function handlePointerUp(event, screen) {
@@ -231,7 +242,7 @@ const Controller = (() => {
     const dy = event.clientY - state.y;
     const duration = Date.now() - state.ts;
 
-    if (state.moved && ((dx * dx) + (dy * dy) > SWIPE_MIN_DISTANCE_SQ)) {
+    if (state.moved && (getDistanceSquared(dx, dy) > SWIPE_MIN_DISTANCE_SQ)) {
       const direction = Math.abs(dx) >= Math.abs(dy)
         ? (dx >= 0 ? 'direita' : 'esquerda')
         : (dy >= 0 ? 'baixo' : 'cima');
@@ -289,6 +300,23 @@ const Controller = (() => {
       targetId: selectedInstance()?.id,
       payload: { mode },
     });
+  }
+
+  function issueKeyboardCommand(type, payload = {}) {
+    issueLocalCommand({
+      type,
+      scope: isSyncEnabled ? 'all' : 'single',
+      targetId: selectedInstance()?.id,
+      payload,
+    });
+  }
+
+  function setJoystickByKey(key, pressed) {
+    const direction = JOYSTICK_KEY_MAP[key];
+    if (!direction) return false;
+    joystick[direction] = pressed;
+    sendJoystick();
+    return true;
   }
 
   async function playMacro() {
@@ -379,42 +407,35 @@ const Controller = (() => {
 
       if (event.key === ' ' && !event.repeat) {
         event.preventDefault();
-        issueLocalCommand({ type: 'tap', scope: isSyncEnabled ? 'all' : 'single', targetId: selectedInstance()?.id, payload: { x: 'center', y: 'center' } });
+        issueKeyboardCommand('tap', { x: 'center', y: 'center' });
       }
 
       if (event.key === 'Enter' && !event.repeat) {
-        issueLocalCommand({ type: 'longPress', scope: isSyncEnabled ? 'all' : 'single', targetId: selectedInstance()?.id, payload: { x: 'center', y: 'center', duration: 700 } });
+        issueKeyboardCommand('longPress', { x: 'center', y: 'center', duration: 700 });
       }
 
       if ((event.key === 'q' || event.key === 'Q') && !event.repeat) {
-        issueLocalCommand({ type: 'swipe', scope: isSyncEnabled ? 'all' : 'single', targetId: selectedInstance()?.id, payload: { direction: 'esquerda', dx: -KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS } });
+        issueKeyboardCommand('swipe', { direction: 'esquerda', dx: -KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS });
       }
 
       if ((event.key === 'e' || event.key === 'E') && !event.repeat) {
-        issueLocalCommand({ type: 'swipe', scope: isSyncEnabled ? 'all' : 'single', targetId: selectedInstance()?.id, payload: { direction: 'direita', dx: KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS } });
+        issueKeyboardCommand('swipe', { direction: 'direita', dx: KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS });
       }
 
-      if (event.key === 'ArrowUp' || event.key === 'w' || event.key === 'W') { joystick.up = true; sendJoystick(); }
-      if (event.key === 'ArrowDown' || event.key === 's' || event.key === 'S') { joystick.down = true; sendJoystick(); }
-      if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') { joystick.left = true; sendJoystick(); }
-      if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') { joystick.right = true; sendJoystick(); }
+      setJoystickByKey(event.key, true);
     });
 
     document.addEventListener('keyup', event => {
-      if (event.key === 'ArrowUp' || event.key === 'w' || event.key === 'W') joystick.up = false;
-      if (event.key === 'ArrowDown' || event.key === 's' || event.key === 'S') joystick.down = false;
-      if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') joystick.left = false;
-      if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') joystick.right = false;
-      if (JOYSTICK_KEYS.includes(event.key)) {
-        sendJoystick();
-      }
+      if (JOYSTICK_KEYS.includes(event.key)) setJoystickByKey(event.key, false);
     });
 
     if (channel) channel.addEventListener('message', event => handleEnvelope(event.data));
 
     window.addEventListener('storage', event => {
       if (event.key !== SYNC_STORAGE_KEY || !event.newValue) return;
-      try { handleEnvelope(JSON.parse(event.newValue)); } catch { /* noop */ }
+      try { handleEnvelope(JSON.parse(event.newValue)); } catch (error) {
+        console.warn('Falha ao processar comando sincronizado', error);
+      }
     });
   }
 
