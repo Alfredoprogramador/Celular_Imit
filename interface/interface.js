@@ -3,7 +3,7 @@ function $(sel, ctx = document) { return ctx.querySelector(sel); }
 const Storage = {
   get(key, fallback = null) {
     try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch (error) {
-      console.warn(`Falha ao ler storage key "${key}"`, error);
+      console.warn(`Falha ao ler/parsing da storage key "${key}"`, error);
       return fallback;
     }
   },
@@ -39,11 +39,11 @@ const Controller = (() => {
   const KEYBOARD_LONG_PRESS_DURATION_MS = 700;
   const KEYBOARD_SWIPE_DISTANCE = 80;
   const KEYBOARD_SWIPE_DURATION_MS = 180;
-  const JOYSTICK_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D'];
   const JOYSTICK_KEY_MAP = {
     ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
     w: 'up', W: 'up', s: 'down', S: 'down', a: 'left', A: 'left', d: 'right', D: 'right',
   };
+  const JOYSTICK_KEYS = Object.keys(JOYSTICK_KEY_MAP);
   const channel = 'BroadcastChannel' in window ? new BroadcastChannel('interface_stage2_channel') : null;
   const WINDOW_ID = createUniqueId();
 
@@ -106,6 +106,14 @@ const Controller = (() => {
 
   function getDistanceSquared(dx, dy) {
     return (dx * dx) + (dy * dy);
+  }
+
+  function getRelativePoint(event, screen) {
+    const rect = screen.getBoundingClientRect();
+    return {
+      x: Math.round(event.clientX - rect.left),
+      y: Math.round(event.clientY - rect.top),
+    };
   }
 
   function render() {
@@ -202,7 +210,11 @@ const Controller = (() => {
       sentAt: Date.now(),
     };
     if (channel) channel.postMessage(envelope);
-    localStorage.setItem(SYNC_STORAGE_KEY, JSON.stringify(envelope));
+    try {
+      localStorage.setItem(SYNC_STORAGE_KEY, JSON.stringify(envelope));
+    } catch (error) {
+      console.warn('Falha ao persistir evento de sincronização', error);
+    }
   }
 
   function handleEnvelope(envelope) {
@@ -216,9 +228,10 @@ const Controller = (() => {
     event.preventDefault();
 
     const instanceId = parseInt(screen.dataset.instanceId, 10);
+    const point = getRelativePoint(event, screen);
     const state = {
-      x: event.clientX,
-      y: event.clientY,
+      x: point.x,
+      y: point.y,
       ts: Date.now(),
       moved: false,
     };
@@ -231,8 +244,9 @@ const Controller = (() => {
     const state = dragState.get(instanceId);
     if (!state) return;
 
-    const dx = event.clientX - state.x;
-    const dy = event.clientY - state.y;
+    const point = getRelativePoint(event, screen);
+    const dx = point.x - state.x;
+    const dy = point.y - state.y;
     if (getDistanceSquared(dx, dy) > MOVE_DETECTION_THRESHOLD_SQ) state.moved = true;
   }
 
@@ -242,8 +256,9 @@ const Controller = (() => {
     dragState.delete(instanceId);
     if (!state) return;
 
-    const dx = event.clientX - state.x;
-    const dy = event.clientY - state.y;
+    const point = getRelativePoint(event, screen);
+    const dx = point.x - state.x;
+    const dy = point.y - state.y;
     const duration = Date.now() - state.ts;
 
     if (state.moved && (getDistanceSquared(dx, dy) > SWIPE_MIN_DISTANCE_SQ)) {
@@ -274,7 +289,7 @@ const Controller = (() => {
       type: 'longPress',
       scope: isSyncEnabled ? 'all' : 'single',
       targetId: instanceId,
-      payload: { x: Math.round(event.clientX), y: Math.round(event.clientY), duration: CONTEXT_MENU_LONG_PRESS_DURATION_MS },
+      payload: { ...getRelativePoint(event, screen), duration: CONTEXT_MENU_LONG_PRESS_DURATION_MS },
     });
   }
 
