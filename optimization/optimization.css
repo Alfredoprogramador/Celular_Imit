@@ -1,0 +1,472 @@
+/* ── Reset & base ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --border:    #30363d;
+  --accent:    #58a6ff;
+  --accent2:   #3fb950;
+  --warn:      #d29922;
+  --danger:    #f85149;
+  --muted:     #8b949e;
+  --text:      #c9d1d9;
+  --radius:    10px;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px 16px 48px;
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-header a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+.page-header a:hover { color: var(--accent); }
+
+.page-header h1 {
+  font-size: 1.5rem;
+  color: var(--accent);
+  flex: 1;
+}
+
+/* ── Grid layout ──────────────────────────────────────── */
+.opt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── Panel card ───────────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title .icon { font-size: 1.2rem; }
+
+/* ── Buttons ──────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #21262d;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn:hover { background: #30363d; border-color: var(--accent); }
+.btn.primary { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+.btn.primary:hover { background: #388bfd; }
+.btn.danger  { background: #da313120; border-color: var(--danger); color: var(--danger); }
+.btn.danger:hover  { background: var(--danger); color: #fff; }
+.btn.success { background: #2ea04320; border-color: var(--accent2); color: var(--accent2); }
+.btn.success:hover { background: var(--accent2); color: #0d1117; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Toggle switch ────────────────────────────────────── */
+.toggle {
+  position: relative;
+  width: 42px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: #30363d;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  left: 3px; top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.toggle input:checked + .toggle-slider { background: var(--accent2); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+/* ── Resource sliders ─────────────────────────────────── */
+.resource-row { margin-bottom: 18px; }
+.resource-row:last-child { margin-bottom: 0; }
+
+.resource-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.87rem;
+}
+.resource-label span:last-child { color: var(--accent); font-weight: 600; }
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #30363d;
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { background: #388bfd; }
+input[type=range]:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Eco Mode ─────────────────────────────────────────── */
+.eco-global-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-size: 0.87rem;
+  color: var(--muted);
+}
+
+.eco-instance-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.eco-instance-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+
+.eco-instance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.eco-instance-name { font-weight: 500; }
+
+.eco-fps-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.eco-fps-row input[type=range] { flex: 1; }
+
+.eco-fps-value {
+  min-width: 50px;
+  text-align: right;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.eco-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 18px 0;
+}
+
+/* ── Graphics Renderer ────────────────────────────────── */
+.gpu-info-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+.gpu-info-box .label { color: var(--muted); }
+.gpu-info-box .value { color: var(--accent); font-weight: 500; }
+
+.api-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.api-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.api-btn:hover { border-color: var(--accent); }
+.api-btn.selected {
+  border-color: var(--accent);
+  background: #1f6feb20;
+  color: var(--accent);
+}
+.api-btn .api-icon { font-size: 1.6rem; margin-bottom: 6px; display: block; }
+.api-btn .api-name { font-weight: 600; display: block; }
+.api-btn .api-desc { font-size: 0.72rem; color: var(--muted); display: block; margin-top: 3px; }
+.api-btn.selected .api-desc { color: #58a6ff99; }
+
+.quality-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 8px;
+  gap: 10px;
+}
+
+.quality-row select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.quality-row select:focus { border-color: var(--accent); }
+
+/* ── Media Capture ────────────────────────────────────── */
+.capture-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.capture-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  min-height: 42px;
+}
+
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+.rec-dot.recording {
+  background: var(--danger);
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+.capture-download-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-thumb {
+  display: none;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  max-height: 120px;
+  object-fit: contain;
+  background: var(--bg);
+}
+.preview-thumb.visible { display: block; }
+
+/* ── Gamepad Support ──────────────────────────────────── */
+.gamepad-status {
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.gamepad-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.gamepad-card {
+  background: var(--bg);
+  border: 1px solid var(--accent2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.83rem;
+}
+
+.gamepad-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.gamepad-card-header .gp-icon { font-size: 1.3rem; }
+
+.button-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: #21262d;
+  border: 1px solid var(--border);
+  font-size: 0.7rem;
+  color: var(--muted);
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+  font-weight: 600;
+}
+.gp-btn.pressed {
+  background: #1f6feb;
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.axes-row {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.axis-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.axis-track {
+  flex: 1;
+  height: 8px;
+  background: #21262d;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.axis-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: transform 0.05s;
+  transform-origin: left;
+  width: 100%;
+}
+
+.no-gamepad {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ── Toast ────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #21262d;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 0.88rem;
+  color: var(--text);
+  box-shadow: 0 8px 24px #00000060;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  z-index: 999;
+  max-width: 320px;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── Scrollbar ────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
