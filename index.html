@@ -146,6 +146,7 @@
         activeApp: null,
         dial: ""
       };
+      const dialKeys = [1, 2, 3, 4, 5, 6, 7, 8, 9, "*", 0, "#"];
 
       const screen = document.getElementById("screen");
       const clock = document.getElementById("clock");
@@ -199,7 +200,7 @@
             <h3>📞 Discador Android</h3>
             <div class="output" id="dial-output">Número: ${state.dial || "(vazio)"}</div>
             <div class="dial">
-              ${[1,2,3,4,5,6,7,8,9,"*",0,"#"].map((k) => `<button class="key" data-key="${k}">${k}</button>`).join("")}
+              ${dialKeys.map((k) => `<button class="key" data-key="${k}">${k}</button>`).join("")}
             </div>
             <button class="action call" id="call">Ligar</button>
           `;
@@ -213,7 +214,12 @@
 
           document.getElementById("call").onclick = () => {
             const output = document.getElementById("dial-output");
-            output.textContent = state.dial ? `Chamando ${state.dial}...` : "Digite um número antes de ligar.";
+            if (!state.dial) {
+              output.textContent = "Digite um número antes de ligar.";
+              return;
+            }
+            output.textContent = `Chamando ${state.dial}...`;
+            state.dial = "";
           };
 
           return;
