@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Etapa 1 — Núcleo de Virtualização | Celular_Imit</title>
+  <link rel="stylesheet" href="nucleus.css" />
+</head>
+<body>
+
+  <!-- ── Page Header ──────────────────────────────────── -->
+  <div class="page-header" style="max-width:1200px;margin:0 auto 28px;">
+    <a href="../index.html">← Painel</a>
+    <h1>⚙️ Etapa 1 — Núcleo de Virtualização e Sistema</h1>
+    <span id="instance-count" style="font-size:.82rem;color:var(--muted);white-space:nowrap;"></span>
+  </div>
+
+  <!-- ── Main Grid ────────────────────────────────────── -->
+  <main class="nucleus-grid">
+
+    <!-- 1. Multi-Instance Manager -->
+    <section class="panel">
+      <div class="panel-title">
+        <span class="icon">📦</span>
+        Gerenciamento de Instâncias
+      </div>
+
+      <ul id="instance-list" class="instance-list"></ul>
+
+      <button id="add-instance-btn" class="btn primary" style="width:100%;">
+        ＋ Nova Instância
+      </button>
+    </section>
+
+    <!-- 2. Android Version Selector -->
+    <section class="panel">
+      <div class="panel-title">
+        <span class="icon">🤖</span>
+        Versão do Android
+      </div>
+
+      <div id="version-grid" class="version-grid"></div>
+    </section>
+
+    <!-- 3. Resource Allocation -->
+    <section class="panel">
+      <div class="panel-title">
+        <span class="icon">💻</span>
+        Alocação de Recursos
+      </div>
+
+      <div class="resource-row">
+        <div class="resource-label">
+          <span>Núcleos de CPU</span>
+          <span id="cpu-value">2 núcleo(s)</span>
+        </div>
+        <input type="range" id="cpu-slider" min="1" max="8" step="1" value="2" />
+      </div>
+
+      <div class="resource-row">
+        <div class="resource-label">
+          <span>Memória RAM</span>
+          <span id="ram-value">2 GB</span>
+        </div>
+        <input type="range" id="ram-slider" min="512" max="16384" step="512" value="2048" />
+      </div>
+
+      <div class="auto-toggle-row">
+        <span>Alocação automática</span>
+        <label class="toggle">
+          <input type="checkbox" id="auto-toggle" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div style="margin-top:14px;">
+        <button id="apply-resources-btn" class="btn primary" style="width:100%;">
+          ✔ Aplicar Recursos
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. Device Simulation -->
+    <section class="panel">
+      <div class="panel-title">
+        <span class="icon">📱</span>
+        Simulação de Dispositivo
+        <label class="toggle" style="margin-left:auto;" title="Ativar simulação">
+          <input type="checkbox" id="device-sim-toggle" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label for="device-select">Modelo do Dispositivo</label>
+        <select id="device-select"></select>
+      </div>
+
+      <div class="form-row" id="custom-model-row" style="display:none;">
+        <label for="custom-model-input">Modelo personalizado</label>
+        <input type="text" id="custom-model-input" placeholder="ex: SM-G998B" />
+      </div>
+
+      <div class="form-row" id="custom-brand-row" style="display:none;">
+        <label for="custom-brand-input">Fabricante personalizado</label>
+        <input type="text" id="custom-brand-input" placeholder="ex: Samsung" />
+      </div>
+
+      <div class="form-row">
+        <label for="imei-display">IMEI Simulado</label>
+        <div class="imei-display">
+          <input type="text" id="imei-display" readonly />
+          <button id="regenerate-imei-btn" class="btn" title="Gerar novo IMEI">🔄</button>
+        </div>
+      </div>
+
+      <p id="device-info-text" style="font-size:.8rem;color:var(--muted);margin-top:6px;"></p>
+    </section>
+
+    <!-- 5. Root Access -->
+    <section class="panel">
+      <div class="panel-title">
+        <span class="icon" id="root-icon">🔒</span>
+        Acesso Root
+      </div>
+
+      <div id="root-badge" class="root-status-badge disabled">
+        <span style="font-size:1.5rem" id="root-icon-badge">🔒</span>
+        <span id="root-status-text">Root DESATIVADO</span>
+      </div>
+
+      <div class="root-warning">
+        ⚠️ Ativar o root concede acesso total ao sistema de arquivos do emulador. Use com cautela — modificações incorretas podem tornar a instância instável.
+      </div>
+
+      <p id="root-perms-info" style="font-size:.82rem;color:var(--muted);margin-bottom:14px;line-height:1.5;"></p>
+
+      <button id="root-toggle-btn" class="btn success" style="width:100%;">
+        🔓 Ativar Root
+      </button>
+    </section>
+
+  </main>
+
+  <!-- ── Toast ────────────────────────────────────────── -->
+  <div id="toast"></div>
+
+  <script src="nucleus.js"></script>
+</body>
+</html>
