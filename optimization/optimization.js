@@ -134,6 +134,7 @@ const EcoMode = (() => {
     list.querySelectorAll('.eco-inst-toggle').forEach(toggle => {
       toggle.addEventListener('change', () => {
         const id  = parseInt(toggle.dataset.id, 10);
+        // checked = eco active → low FPS; unchecked → restore to primary default
         const fps = toggle.checked ? DEFAULT_FPS_SECONDARY : DEFAULT_FPS_PRIMARY;
         cfg.instances[id] = fps;
         save();
@@ -251,6 +252,7 @@ const MediaCapture = (() => {
   let recordedChunks = [];
   let isRecording    = false;
   let stream         = null;
+  let currentVideoUrl = null;
 
   function setStatus(text, recording = false) {
     document.getElementById('capture-status-text').textContent = text;
@@ -320,9 +322,14 @@ const MediaCapture = (() => {
 
       mediaRecorder.onstop = () => {
         const blob    = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'video/webm' });
-        const url     = URL.createObjectURL(blob);
+        // Revoke any previous recording URL to avoid memory leaks
+        if (currentVideoUrl) {
+          URL.revokeObjectURL(currentVideoUrl);
+          currentVideoUrl = null;
+        }
+        currentVideoUrl = URL.createObjectURL(blob);
         const vidLink = document.getElementById('video-link');
-        vidLink.href = url;
+        vidLink.href = currentVideoUrl;
         vidLink.style.display = '';
         setStatus('Gravação finalizada. Clique em Baixar para exportar.');
         Toast.show('Gravação concluída — clique em Baixar para exportar', 'success');
@@ -398,6 +405,8 @@ const GamepadSupport = (() => {
   const AXIS_LABELS = ['LX', 'LY', 'RX', 'RY'];
 
   let rafId = null;
+  // Persists previous axis values across frames for throttled DOM updates
+  const prevAxes = {};
 
   function buildGamepadCard(gp) {
     const li = document.createElement('li');
@@ -415,7 +424,7 @@ const GamepadSupport = (() => {
         <div class="axis-bar-row">
           <span style="min-width:24px;">${escapeHtml(label)}</span>
           <div class="axis-track">
-            <div class="axis-fill" id="gp-axis-${gp.index}-${i}" style="width:50%;"></div>
+            <div class="axis-fill" id="gp-axis-${gp.index}-${i}" style="transform:scaleX(0.5);"></div>
           </div>
           <span id="gp-axis-val-${gp.index}-${i}"
                 style="min-width:36px;text-align:right;font-size:.74rem;">0.00</span>
@@ -470,10 +479,22 @@ const GamepadSupport = (() => {
 
       // Update axes
       gp.axes.forEach((val, i) => {
-        const fill = document.getElementById(`gp-axis-${gp.index}-${i}`);
+        const fill  = document.getElementById(`gp-axis-${gp.index}-${i}`);
         const valEl = document.getElementById(`gp-axis-val-${gp.index}-${i}`);
-        if (fill)  fill.style.width  = `${((val + 1) / 2) * 100}%`;
-        if (valEl) valEl.textContent = val.toFixed(2);
+        if (fill) {
+          // Use CSS transform (scaleX) instead of width to avoid layout recalculations
+          const scale = (val + 1) / 2;
+          fill.style.transform = `scaleX(${scale})`;
+        }
+        if (valEl) {
+          const key = `${gp.index}-${i}`;
+          const prev = prevAxes[key] ?? null;
+          // Only update text when value changes by more than 0.01 to reduce DOM thrashing
+          if (prev === null || Math.abs(val - prev) > 0.01) {
+            valEl.textContent = val.toFixed(2);
+            prevAxes[key] = val;
+          }
+        }
       });
     });
 

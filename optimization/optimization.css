@@ -433,8 +433,9 @@ input[type=range]:disabled { opacity: 0.4; cursor: not-allowed; }
   height: 100%;
   background: var(--accent);
   border-radius: 4px;
-  transition: width 0.05s;
+  transition: transform 0.05s;
   transform-origin: left;
+  width: 100%;
 }
 
 .no-gamepad {
