@@ -8,7 +8,9 @@ const Storage = {
     }
   },
   set(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* noop */ }
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (error) {
+      console.warn(`Falha ao salvar storage key "${key}"`, error);
+    }
   },
 };
 
@@ -33,6 +35,8 @@ const Controller = (() => {
   const SWIPE_MIN_DISTANCE = 24;
   const SWIPE_MIN_DISTANCE_SQ = SWIPE_MIN_DISTANCE * SWIPE_MIN_DISTANCE;
   const LONG_PRESS_DURATION_MS = 450;
+  const CONTEXT_MENU_LONG_PRESS_DURATION_MS = 650;
+  const KEYBOARD_LONG_PRESS_DURATION_MS = 700;
   const KEYBOARD_SWIPE_DISTANCE = 80;
   const KEYBOARD_SWIPE_DURATION_MS = 180;
   const JOYSTICK_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 'a', 'A', 's', 'S', 'd', 'D'];
@@ -270,7 +274,7 @@ const Controller = (() => {
       type: 'longPress',
       scope: isSyncEnabled ? 'all' : 'single',
       targetId: instanceId,
-      payload: { x: Math.round(event.clientX), y: Math.round(event.clientY), duration: 650 },
+      payload: { x: Math.round(event.clientX), y: Math.round(event.clientY), duration: CONTEXT_MENU_LONG_PRESS_DURATION_MS },
     });
   }
 
@@ -302,7 +306,7 @@ const Controller = (() => {
     });
   }
 
-  function issueKeyboardCommand(type, payload = {}) {
+  function issueCommandForSelectedInstance(type, payload = {}) {
     issueLocalCommand({
       type,
       scope: isSyncEnabled ? 'all' : 'single',
@@ -407,19 +411,19 @@ const Controller = (() => {
 
       if (event.key === ' ' && !event.repeat) {
         event.preventDefault();
-        issueKeyboardCommand('tap', { x: 'center', y: 'center' });
+        issueCommandForSelectedInstance('tap', { x: 'center', y: 'center' });
       }
 
       if (event.key === 'Enter' && !event.repeat) {
-        issueKeyboardCommand('longPress', { x: 'center', y: 'center', duration: 700 });
+        issueCommandForSelectedInstance('longPress', { x: 'center', y: 'center', duration: KEYBOARD_LONG_PRESS_DURATION_MS });
       }
 
       if ((event.key === 'q' || event.key === 'Q') && !event.repeat) {
-        issueKeyboardCommand('swipe', { direction: 'esquerda', dx: -KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS });
+        issueCommandForSelectedInstance('swipe', { direction: 'esquerda', dx: -KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS });
       }
 
       if ((event.key === 'e' || event.key === 'E') && !event.repeat) {
-        issueKeyboardCommand('swipe', { direction: 'direita', dx: KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS });
+        issueCommandForSelectedInstance('swipe', { direction: 'direita', dx: KEYBOARD_SWIPE_DISTANCE, dy: 0, duration: KEYBOARD_SWIPE_DURATION_MS });
       }
 
       setJoystickByKey(event.key, true);
