@@ -10,6 +10,6 @@ Emulador Android simples que funciona no PC via navegador.
 
 ## Controles
 
-- **Power**: liga/desliga a tela
+- **Power**: liga/desliga e reinicia o estado do aparelho (bloqueia, fecha app aberto e limpa o discador)
 - **Home**: volta para a tela de apps
 - **Lock**: bloqueia o celular

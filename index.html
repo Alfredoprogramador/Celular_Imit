@@ -164,11 +164,21 @@
 
       function escapeHtml(value) {
         return String(value)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll("\"", "&quot;")
-          .replaceAll("'", "&#39;");
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function updateDialOutputText(customText) {
+        const output = document.getElementById("dial-output");
+        if (!output) return;
+        if (customText) {
+          output.textContent = customText;
+          return;
+        }
+        output.textContent = `Número: ${state.dialedNumber || "(vazio)"}`;
       }
 
       function render() {
@@ -210,33 +220,33 @@
         if (state.activeApp === "phone") {
           screen.innerHTML = `
             <h3>📞 Discador Android</h3>
-            <div class="output" id="dial-output" aria-live="polite">Número: ${state.dialedNumber ? escapeHtml(state.dialedNumber) : "(vazio)"}</div>
+            <div class="output" id="dial-output" aria-live="polite"></div>
             <div class="dial">
               ${dialKeys.map((k) => `<button class="key" data-key="${escapeHtml(k)}">${escapeHtml(k)}</button>`).join("")}
             </div>
             <button class="action call" id="call">Ligar</button>
           `;
+          updateDialOutputText();
 
           document.querySelectorAll("[data-key]").forEach((button) => {
             button.onclick = () => {
               if (state.dialedNumber.length >= MAX_DIAL_LENGTH) return;
               state.dialedNumber += button.dataset.key;
-              render();
+              updateDialOutputText();
             };
           });
 
           document.getElementById("call").onclick = () => {
-            const output = document.getElementById("dial-output");
             if (!state.dialedNumber) {
-              output.textContent = "Digite um número antes de ligar.";
+              updateDialOutputText("Digite um número antes de ligar.");
               return;
             }
             if (!dialPattern.test(state.dialedNumber)) {
-              output.textContent = "Número inválido.";
+              updateDialOutputText("Número inválido.");
               state.dialedNumber = "";
               return;
             }
-            output.textContent = `Chamando ${state.dialedNumber}...`;
+            updateDialOutputText(`Chamando ${state.dialedNumber}...`);
             state.dialedNumber = "";
           };
 
@@ -289,7 +299,7 @@
       };
 
       tickClock();
-      if (clock) setInterval(tickClock, 1000);
+      if (clock) setInterval(tickClock, 60000);
       render();
     </script>
   </body>
