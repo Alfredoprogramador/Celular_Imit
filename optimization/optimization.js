@@ -385,6 +385,14 @@ const MediaCapture = (() => {
     document.getElementById('record-btn').addEventListener('click', () => {
       isRecording ? stopRecording() : startRecording();
     });
+    // Revoke any remaining blob URL when the user navigates away
+    window.addEventListener('beforeunload', () => {
+      if (currentVideoUrl) {
+        URL.revokeObjectURL(currentVideoUrl);
+        currentVideoUrl = null;
+      }
+      if (isRecording) stopRecording();
+    });
   }
 
   return { init };
@@ -526,6 +534,14 @@ const GamepadSupport = (() => {
 
     // Start polling loop for button/axis state (required for most browsers)
     rafId = requestAnimationFrame(pollGamepads);
+
+    // Cancel the polling loop when the user navigates away
+    window.addEventListener('beforeunload', () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    });
   }
 
   return { init };
