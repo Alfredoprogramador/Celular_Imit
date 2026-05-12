@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Emulador Android para PC</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f172a;
+        --panel: #111827;
+        --screen: #1f2937;
+        --accent: #22c55e;
+        --text: #f9fafb;
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #1e293b 0%, #020617 70%);
+        display: grid;
+        place-items: center;
+        color: var(--text);
+      }
+
+      .phone {
+        width: 340px;
+        height: 680px;
+        background: var(--panel);
+        border: 10px solid #0b1220;
+        border-radius: 34px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .status {
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 14px;
+        background: #0b1220;
+        font-size: 13px;
+      }
+
+      .screen {
+        flex: 1;
+        background: linear-gradient(165deg, #1f2937 0%, #111827 100%);
+        padding: 18px;
+        display: grid;
+        gap: 12px;
+        align-content: start;
+      }
+
+      .locked {
+        display: grid;
+        place-items: center;
+        font-size: 24px;
+        text-align: center;
+        gap: 12px;
+      }
+
+      .apps {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+        gap: 12px;
+      }
+
+      .app,
+      .action,
+      .key {
+        border: none;
+        border-radius: 14px;
+        color: var(--text);
+        background: #1f2937;
+        padding: 12px;
+        cursor: pointer;
+      }
+
+      .app:hover,
+      .action:hover,
+      .key:hover {
+        background: #374151;
+      }
+
+      .output {
+        background: #0b1220;
+        border-radius: 12px;
+        padding: 12px;
+        min-height: 94px;
+        font-size: 14px;
+      }
+
+      .dial {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 14px;
+        background: #0b1220;
+      }
+
+      .action {
+        background: #1f2937;
+      }
+
+      .call {
+        background: var(--accent);
+        color: #022c22;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="phone">
+      <header class="status">
+        <span id="clock">00:00</span>
+        <span>4G ▮▮▮ 87%</span>
+      </header>
+
+      <section class="screen" id="screen"></section>
+
+      <footer class="controls">
+        <button class="action" id="power" aria-label="Ligar ou desligar aparelho">Power</button>
+        <button class="action" id="home" aria-label="Voltar para tela inicial">Home</button>
+        <button class="action" id="lock" aria-label="Bloquear aparelho">Lock</button>
+      </footer>
+    </main>
+
+    <script>
+      const state = {
+        powered: true,
+        locked: true,
+        activeApp: null,
+        dialedNumber: ""
+      };
+      const dialKeys = [1, 2, 3, 4, 5, 6, 7, 8, 9, "*", 0, "#"];
+      const MAX_DIAL_LENGTH = 15;
+      const dialPattern = new RegExp(`^[0-9*#]{1,${MAX_DIAL_LENGTH}}$`);
+
+      const screen = document.getElementById("screen");
+      const clock = document.getElementById("clock");
+
+      function tickClock() {
+        if (!clock) return;
+        const now = new Date();
+        clock.textContent = now.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll("\"", "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function render() {
+        if (!state.powered) {
+          screen.innerHTML = `<div class="locked"><p>Tela desligada</p><small>Pressione Power</small></div>`;
+          return;
+        }
+
+        if (state.locked) {
+          screen.innerHTML = `<div class="locked"><p>🔒 Bloqueado</p><button class="action" id="unlock">Deslizar para desbloquear</button></div>`;
+          document.getElementById("unlock").onclick = () => {
+            state.locked = false;
+            render();
+          };
+          return;
+        }
+
+        if (!state.activeApp) {
+          screen.innerHTML = `
+            <h3>Apps</h3>
+            <div class="apps">
+              <button class="app" data-app="phone">📞 Telefone</button>
+              <button class="app" data-app="messages">💬 Mensagens</button>
+              <button class="app" data-app="camera">📷 Câmera</button>
+              <button class="app" data-app="browser">🌐 Navegador</button>
+            </div>
+            <div class="output">Selecione um app para simular o uso no PC.</div>
+          `;
+
+          document.querySelectorAll("[data-app]").forEach((button) => {
+            button.onclick = () => {
+              state.activeApp = button.dataset.app;
+              render();
+            };
+          });
+          return;
+        }
+
+        if (state.activeApp === "phone") {
+          screen.innerHTML = `
+            <h3>📞 Discador Android</h3>
+            <div class="output" id="dial-output" aria-live="polite">Número: ${state.dialedNumber ? escapeHtml(state.dialedNumber) : "(vazio)"}</div>
+            <div class="dial">
+              ${dialKeys.map((k) => `<button class="key" data-key="${escapeHtml(k)}">${escapeHtml(k)}</button>`).join("")}
+            </div>
+            <button class="action call" id="call">Ligar</button>
+          `;
+
+          document.querySelectorAll("[data-key]").forEach((button) => {
+            button.onclick = () => {
+              if (state.dialedNumber.length >= MAX_DIAL_LENGTH) return;
+              state.dialedNumber += button.dataset.key;
+              render();
+            };
+          });
+
+          document.getElementById("call").onclick = () => {
+            const output = document.getElementById("dial-output");
+            if (!state.dialedNumber) {
+              output.textContent = "Digite um número antes de ligar.";
+              return;
+            }
+            if (!dialPattern.test(state.dialedNumber)) {
+              output.textContent = "Número inválido.";
+              state.dialedNumber = "";
+              return;
+            }
+            output.textContent = `Chamando ${state.dialedNumber}...`;
+            state.dialedNumber = "";
+          };
+
+          return;
+        }
+
+        if (state.activeApp === "messages") {
+          screen.innerHTML = `
+            <h3>💬 Mensagens</h3>
+            <div class="output">Nenhuma mensagem nova.</div>
+          `;
+          return;
+        }
+
+        if (state.activeApp === "camera") {
+          screen.innerHTML = `
+            <h3>📷 Câmera</h3>
+            <div class="output">Câmera simulada: visualize a prévia e capture screenshots no PC.</div>
+          `;
+          return;
+        }
+
+        screen.innerHTML = `
+          <h3>🌐 Navegador</h3>
+          <div class="output">Navegação simulada no ambiente desktop.</div>
+        `;
+      }
+
+      document.getElementById("power").onclick = () => {
+        state.powered = !state.powered;
+        state.locked = true;
+        state.activeApp = null;
+        state.dialedNumber = "";
+        render();
+      };
+
+      document.getElementById("home").onclick = () => {
+        if (!state.powered || state.locked) return;
+        state.activeApp = null;
+        state.dialedNumber = "";
+        render();
+      };
+
+      document.getElementById("lock").onclick = () => {
+        if (!state.powered) return;
+        state.locked = true;
+        state.activeApp = null;
+        state.dialedNumber = "";
+        render();
+      };
+
+      tickClock();
+      if (clock) setInterval(tickClock, 1000);
+      render();
+    </script>
+  </body>
+</html>
