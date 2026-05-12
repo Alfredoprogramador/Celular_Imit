@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Celular_Imit — Emulador Android</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      color: #58a6ff;
+      letter-spacing: 2px;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 1rem;
+      color: #8b949e;
+    }
+
+    .stages {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .stage-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 28px 36px;
+      width: 280px;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .stage-card:hover {
+      border-color: #58a6ff;
+      transform: translateY(-4px);
+    }
+
+    .stage-card .icon {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+    }
+
+    .stage-card h2 {
+      font-size: 1.1rem;
+      color: #58a6ff;
+      margin-bottom: 8px;
+    }
+
+    .stage-card p {
+      font-size: 0.85rem;
+      color: #8b949e;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #1f6feb33;
+      color: #58a6ff;
+      border: 1px solid #1f6feb66;
+    }
+
+    .badge.wip { background: #3d1f0033; color: #d29922; border-color: #d2992266; }
+
+    footer {
+      margin-top: 60px;
+      font-size: 0.78rem;
+      color: #484f58;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📱 Celular_Imit</h1>
+    <p>Plataforma de Emulação Android — Painel de Etapas</p>
+  </header>
+
+  <div class="stages">
+    <a class="stage-card" href="virtualization/nucleus.html">
+      <div class="icon">⚙️</div>
+      <h2>Etapa 1 — Núcleo de Virtualização</h2>
+      <p>Gerenciamento de instâncias, seleção de versão do Android, alocação de recursos, simulação de dispositivo e acesso root.</p>
+      <span class="badge">Disponível</span>
+    </a>
+
+    <div class="stage-card" style="cursor:default; opacity:0.5;">
+      <div class="icon">🖥️</div>
+      <h2>Etapa 2 — Interface Gráfica</h2>
+      <p>Renderização da tela do dispositivo emulado, controles de toque e teclado virtual.</p>
+      <span class="badge wip">Em breve</span>
+    </div>
+
+    <div class="stage-card" style="cursor:default; opacity:0.5;">
+      <div class="icon">🌐</div>
+      <h2>Etapa 3 — Rede & Conectividade</h2>
+      <p>Simulação de Wi-Fi, dados móveis, GPS e Bluetooth para testes de apps.</p>
+      <span class="badge wip">Em breve</span>
+    </div>
+  </div>
+
+  <footer>Celular_Imit © 2026 — Projeto Open Source</footer>
+</body>
+</html>
