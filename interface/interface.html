@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Etapa 2 — Interface e Mapeamento | Celular_Imit</title>
+  <link rel="stylesheet" href="interface.css" />
+</head>
+<body>
+  <div class="page-header">
+    <a href="../index.html">← Painel</a>
+    <h1>🖥️ Etapa 2 — Interface e Mapeamento de Controle</h1>
+    <span id="active-instances"></span>
+  </div>
+
+  <main class="layout">
+    <section class="panel controls-panel">
+      <h2>Controles</h2>
+
+      <div class="control-row">
+        <span>Sincronizador de instâncias</span>
+        <label class="toggle">
+          <input type="checkbox" id="sync-toggle" checked />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="control-row orientation-row">
+        <span>Orientação</span>
+        <div class="orientation-actions">
+          <button class="btn" id="portrait-btn">📱 Retrato</button>
+          <button class="btn" id="landscape-btn">🖥️ Paisagem</button>
+        </div>
+      </div>
+
+      <div class="macro-box">
+        <h3>Macros e Scripts</h3>
+        <div class="macro-actions">
+          <button class="btn" id="record-macro-btn">⏺ Gravar</button>
+          <button class="btn" id="stop-macro-btn" disabled>⏹ Parar</button>
+          <button class="btn" id="play-macro-btn" disabled>▶ Reproduzir</button>
+          <button class="btn" id="clear-macro-btn" disabled>🗑 Limpar</button>
+        </div>
+        <ul id="macro-list" class="macro-list"></ul>
+      </div>
+
+      <div class="keymap-box">
+        <h3>Keymapping</h3>
+        <ul>
+          <li>Clique esquerdo → Tap</li>
+          <li>Clique direito / toque longo → Long Press</li>
+          <li>Arrastar no visor → Swipe</li>
+          <li>WASD / Setas → Joystick virtual</li>
+          <li>Espaço → Tap central</li>
+          <li>Enter → Long Press central</li>
+          <li>Q / E → Swipe horizontal</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel instances-panel">
+      <h2>Instâncias emuladas</h2>
+      <p class="helper">Clique em uma instância para selecioná-la e interagir.</p>
+      <div id="instance-grid" class="instance-grid"></div>
+    </section>
+  </main>
+
+  <div id="toast"></div>
+
+  <script src="interface.js"></script>
+</body>
+</html>
