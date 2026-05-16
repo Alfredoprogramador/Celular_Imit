@@ -209,15 +209,15 @@ const ResourceManager = (() => {
     ramSlider.value = cfg.ram;
   }
 
-  // Default fallback: 2 GB in bytes, converted to MB and halved for the emulator share.
+  // Default fallback: 2 GB.
   // Note: performance.memory is a non-standard Chromium-only API; Firefox/Safari will
-  // always use the DEFAULT_RAM_MB fallback below.
+  // use this fallback value.
   const DEFAULT_RAM_MB = 2048;
   const BYTES_PER_MB = 1024 * 1024;
 
   function autoAllocate() {
     cfg.cpu = Math.max(1, Math.floor(MAX_CPU / 2));
-    const heapBytes = performance.memory?.jsHeapSizeLimit ?? (DEFAULT_RAM_MB * BYTES_PER_MB * 2);
+    const heapBytes = performance.memory?.jsHeapSizeLimit ?? (DEFAULT_RAM_MB * BYTES_PER_MB);
     cfg.ram = Math.min(MAX_RAM, Math.floor(heapBytes / BYTES_PER_MB / 2));
     if (cfg.ram < 512) cfg.ram = DEFAULT_RAM_MB;
     Storage.set(STORAGE_KEY, cfg);
